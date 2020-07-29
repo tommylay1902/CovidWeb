@@ -1,0 +1,21 @@
+﻿@model City
+<a class="btn btn-outline-info  btn-sm btn-block" asp-controller="Import" asp-action="Menu">Import Data</a>
+
+
+
+<table class="table table-bordered">
+    <tr><th>Date</th> <th>Cases</th> <th>Deaths</th> <th>Tests</th></tr>
+    @if (Model == null)
+    {
+
+    }
+    else
+    {
+        @foreach (var data in Model.Data)
+        {
+            
+            <tr><td>@data.Date</td><td>@data.Cases</td><td>@data.Deaths</td><td>@data.Tested</td></tr>
+        }
+    }
+
+</table>
