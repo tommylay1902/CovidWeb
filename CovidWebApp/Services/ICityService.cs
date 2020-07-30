@@ -1,12 +1,10 @@
 ﻿
 using CovidWebApp.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace CovidWebApp.Services
 {
@@ -15,12 +13,15 @@ namespace CovidWebApp.Services
         public List<City> GetCities();
         public City GetCity(int id);
         public void AddCity(City c);
+        public void AddUserInputCity(City c);
         public void SaveChanges();
         public void ImportCityData(IFormFile file, DateTime date);
         public bool IsEmpty();
-
-/*        public void GetCityCaseData(City c);*/
-
+        public List<DateTime> GetCaseDataDates(int id);
+        public List<CaseData> GetCityCaseData(int id);
+        public List<int> GetCaseDataCases(int id);
+        public List<int> GetCaseDataDeaths(int id);
+        public List<int> GetCaseDataTested(int id);
 
     }
 
@@ -49,16 +50,20 @@ namespace CovidWebApp.Services
         {
             _db.SaveChanges();
         }
-
+        public List<CaseData> GetCityCaseData(int id)
+        {
+            var caseDatas = _db.CaseDatas.ToList();
+            return caseDatas.Where(x => x.City.Id == id).OrderBy(x => x.Date).ToList();
+        }
         public void ImportCityData(IFormFile file, DateTime date)
         {
 
             DateTime uploadDate = Convert.ToDateTime(date);
-
+            /*var caseDatas = _db.CaseDatas.ToList();*/
             List<City> cities = _db.Cities.ToList();
             using var reader = new StreamReader(file.OpenReadStream());
             string line;
-
+            
 
             int lineNum = -1;
             while ((line = reader.ReadLine()) != null)
@@ -69,43 +74,78 @@ namespace CovidWebApp.Services
                 string[] dataArr = line.Split(",");
                 string cityName = dataArr[1].Replace("\"", "");
                 CaseData currCase = new CaseData { Date = uploadDate, Cases = int.Parse(dataArr[2]), Deaths = int.Parse(dataArr[5]), Tested = int.Parse(dataArr[8]) };
-
+                
                 //reutrns City or default(null in this case)
                 City result = cities.FirstOrDefault(x => x.CityName == cityName);
 
                 if (result == null)
                 {
-                    City newCity = new City { CityName = cityName, Data = new List<CaseData> { currCase }, Population = int.Parse(dataArr[11]) };
-                    AddCity(newCity);
+                    City newCity = new City { CityName = cityName,  Population = int.Parse(dataArr[11]) };
+                    cities.Add(newCity);
+                    currCase.City = newCity;
+                    _db.CaseDatas.Add(currCase);
                 }
                 else
                 {
                     var updateCity = GetCity(result.Id);
+                    
                     //check to see if file has already been imported
                     //if it is just override data
-                    CaseData caseExist = updateCity.Data.FirstOrDefault(x => x.Date == currCase.Date);
-
-                    if (caseExist == null) updateCity.AddData(currCase);
+                    CaseData caseExist = GetCityCaseData(updateCity.Id).FirstOrDefault(x => x.Date == currCase.Date);
+                    currCase.City = updateCity;
+                    if (caseExist == null)
+                    {
+                        _db.CaseDatas.Add(currCase);
+                        /*caseDatas.Add(currCase);*/
+                    }
 
                     else
                     {
-                        updateCity.Data.Remove(caseExist);
-                        updateCity.AddData(currCase);
+                    /*    GetCityCaseData(updateCity.Id).Remove(caseExist);*/
+                        _db.CaseDatas.Remove(caseExist);
+                        _db.CaseDatas.Add(currCase);
+/*
+                        caseDatas.Remove(caseExist);
+                        caseDatas.Add(currCase);*/
+                        GetCityCaseData(updateCity.Id).Add(currCase);
                     }
 
                 }
-                SaveChanges();
+                
             }
-
-
+            SaveChanges();
 
         }
-
+        
         public bool IsEmpty()
         {
             if (_db.Cities.Count() == 0) return true;
             return false;
         }
 
+        public List<DateTime> GetCaseDataDates(int id)
+        {
+            return _db.CaseDatas.Where(x => x.City.Id == id).Select(x => x.Date).OrderBy(x => x.Date).ToList();
+        }
+
+        public List<int> GetCaseDataCases(int id)
+        {
+            return _db.CaseDatas.Where(x => x.City.Id == id).Select(x => x.Cases).ToList();
+        }
+
+        public List<int> GetCaseDataDeaths(int id)
+        {
+            return _db.CaseDatas.Where(x => x.City.Id == id).Select(x => x.Deaths).ToList();
+        }
+
+        public List<int> GetCaseDataTested(int id)
+        {
+            return _db.CaseDatas.Where(x => x.City.Id == id).Select(x => x.Tested).ToList();
+        }
+
+        public void AddUserInputCity(City c)
+        {
+            _db.Cities.Add(c);
+        }
     }
 }

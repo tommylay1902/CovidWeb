@@ -12,5 +12,6 @@ namespace CovidWebApp.Models
         public int Cases { get; set; }
         public int Deaths { get; set; }
         public int Tested { get; set; }
+        public virtual City City{get; set;}
     }
 }

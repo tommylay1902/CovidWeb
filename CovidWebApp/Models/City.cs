@@ -10,7 +10,5 @@ namespace CovidWebApp.Models
         public int Id { get; set; }
         public int Population { get; set; }
         public string CityName { get; set; }
-        public virtual List<CaseData> Data { get; set; }
-        public void AddData(CaseData data) => Data.Add(data);
     }
 }

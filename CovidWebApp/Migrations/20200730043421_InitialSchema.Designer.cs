@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CovidWebApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20200729200046_InitialSchema")]
+    [Migration("20200730043421_InitialSchema")]
     partial class InitialSchema
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -70,8 +70,8 @@ namespace CovidWebApp.Migrations
 
             modelBuilder.Entity("CovidWebApp.Models.CaseData", b =>
                 {
-                    b.HasOne("CovidWebApp.Models.City", null)
-                        .WithMany("Data")
+                    b.HasOne("CovidWebApp.Models.City", "City")
+                        .WithMany()
                         .HasForeignKey("CityId");
                 });
 #pragma warning restore 612, 618

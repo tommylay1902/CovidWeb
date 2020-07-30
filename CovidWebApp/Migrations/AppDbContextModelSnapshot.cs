@@ -68,8 +68,8 @@ namespace CovidWebApp.Migrations
 
             modelBuilder.Entity("CovidWebApp.Models.CaseData", b =>
                 {
-                    b.HasOne("CovidWebApp.Models.City", null)
-                        .WithMany("Data")
+                    b.HasOne("CovidWebApp.Models.City", "City")
+                        .WithMany()
                         .HasForeignKey("CityId");
                 });
 #pragma warning restore 612, 618

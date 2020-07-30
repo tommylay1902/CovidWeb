@@ -20,24 +20,47 @@ namespace CovidWebApp.Controllers
             _logger = logger;
             _cityService = cityService;
         }
-
-        public IActionResult Index(int? id = null)
+        public IActionResult Index()
         {
-            if (_cityService.IsEmpty()) return View();
+            ViewBag.Cities = _cityService.GetCities();
+            string idNum = Request.Query["CitySelect"];
+           
+            if(idNum== null)
+            {
+                ViewBag.CityId = 1;
+                ViewBag.Dates = _cityService.GetCaseDataDates(1);
+                ViewBag.ViewSelectOption = 1;
+                ViewBag.ViewOption = _cityService.GetCaseDataCases(1);
+                return View(_cityService.GetCityCaseData(1));
+            }
             else
             {
-                if (id == null)
+                
+                int id = int.Parse(idNum);
+                ViewBag.CityId = id;
+
+                int viewSelectOption = int.Parse(Request.Query["ViewSelect"]);
+                ViewBag.Dates = _cityService.GetCaseDataDates(id);
+                if (viewSelectOption ==  1)
                 {
-                    _logger.LogInformation("Entered the if");
-                    return View(_cityService.GetCity(1));
+                    ViewBag.ViewSelectOption = 1;
+                    ViewBag.ViewOption = _cityService.GetCaseDataCases(id);
+                }
+                else if (viewSelectOption == 2)
+                {
+                    ViewBag.ViewSelectOption = 2;
+                    ViewBag.ViewOption = _cityService.GetCaseDataDeaths(id);
                 }
                 else
                 {
-                    return View(_cityService.GetCity((int)id));
+                    ViewBag.ViewSelectOption = 3;
+                    ViewBag.ViewOption = _cityService.GetCaseDataTested(id);
                 }
+                return View(_cityService.GetCityCaseData(id));
             }
 
         }
+       
 
         public IActionResult Privacy()
         {

@@ -1,5 +1,52 @@
-﻿@model City
-<a class="btn btn-outline-info  btn-sm btn-block" asp-controller="Import" asp-action="Menu">Import Data</a>
+﻿@model List<CaseData>
+@section StyleSheets{
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+}
+<form class="mt-4" asp-action="Index" method="get">
+    <select class ="form-group" name="CitySelect">
+        @foreach (var entry in ViewBag.Cities)
+        {
+            if (entry.Id == ViewBag.CityId)
+            {
+                <option value="@entry.Id" selected>@entry.CityName</option>
+            }
+            else
+            {
+                <option value="@entry.Id"> @entry.CityName</option>
+            }
+        }
+    </select>
+
+
+    <select class ="form-group" name="ViewSelect">
+
+        @if (ViewBag.ViewSelectOption == 1)
+        {
+            <option value="1" selected>Cases</option>
+            <option value="2">Deaths</option>
+            <option value="3">Tests</option>
+        }
+        else if (ViewBag.ViewSelectOption == 2)
+        {
+            <option value="1">Cases</option>
+            <option value="2" selected>Deaths</option>
+            <option value="3">Tests</option>
+        }
+        else
+        {
+            <option value="1">Cases</option>
+            <option value="2">Deaths</option>
+            <option value="3" selected>Tests</option>
+        }
+
+    </select>
+@*    <br />
+    <br />*@
+    <button class="btn-sm btn-info float-right" type="submit">Update Chart</button>
+</form>
+<br />
+
+<div class="ct-chart"></div>
 
 
 
@@ -11,11 +58,53 @@
     }
     else
     {
-        @foreach (var data in Model.Data)
+        @foreach (var data in Model)
+
         {
-            
             <tr><td>@data.Date</td><td>@data.Cases</td><td>@data.Deaths</td><td>@data.Tested</td></tr>
         }
     }
 
 </table>
+<a class="btn btn-outline-info  btn-sm btn-block" asp-controller="AddUserCity" asp-action="Index">Add City</a>
+<a class="btn btn-outline-info  btn-sm btn-block" asp-controller="Import" asp-action="Menu">Import Data</a>
+
+
+@section Scripts{
+    <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"
+            integrity="sha512-vBmx0N/uQOXznm/Nbkp7h0P1RfLSj0HQrFSzV8m7rOGyj30fYAOKHYvCNez+yM8IrfnW0TCodDEjRqf6fodf/Q=="
+            crossorigin="anonymous"></script>
+    <script>
+    var data = {
+        labels: @Json.Serialize(ViewBag.Dates),
+        series: [
+            @Json.Serialize(ViewBag.ViewOption)
+        ]
+    };
+    new Chartist.Line(".ct-chart", data);
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: @Json.Serialize(ViewBag.Dates),
+                datasets: [
+                    {
+                        label: "Cases",
+                        data: @Json.Serialize(ViewBag.ViewOption),
+                        backgroundColor: 'blue'
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
+}
