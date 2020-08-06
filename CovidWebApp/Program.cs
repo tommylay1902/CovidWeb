@@ -18,6 +18,10 @@ namespace CovidWebApp
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                 .ConfigureAppConfiguration((hostingContext, config) =>
+                 {
+                     config.AddXmlFile("MyXMLConfig.xml", optional: true, reloadOnChange: true);
+                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

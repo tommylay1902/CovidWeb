@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using CovidWebApp.Models;
 using CovidWebApp.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace CovidWebApp.Controllers
 {
@@ -14,11 +15,13 @@ namespace CovidWebApp.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ICityService _cityService;
+        private readonly IConfiguration _config;
 
-        public HomeController(ILogger<HomeController> logger, ICityService cityService)
+        public HomeController(ILogger<HomeController> logger, ICityService cityService, IConfiguration config)
         {
             _logger = logger;
             _cityService = cityService;
+            _config = config;
         }
         public IActionResult Index()
         {
@@ -57,11 +60,11 @@ namespace CovidWebApp.Controllers
                     ViewBag.ViewOption = _cityService.GetCaseDataTested(id);
                 }
                 return View(_cityService.GetCityCaseData(id));
+
             }
 
         }
        
-
         public IActionResult Privacy()
         {
             return View();
